@@ -19,3 +19,11 @@
 # If you keep the line number information, uncomment this to
 # hide the original source file name.
 #-renamesourcefileattribute SourceFile
+
+# Suppress Hilt @Generated annotation warnings
+-dontwarn javax.annotation.**
+-dontwarn javax.annotation.processing.**
+-keep class dagger.hilt.** { *; }
+-keepclasseswithmembers class * {
+    @dagger.hilt.* *;
+}

@@ -2,8 +2,8 @@ package com.cursokotlin.aichat
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.cursokotlin.aichat.data.ChatRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -12,7 +12,9 @@ import java.util.UUID
 import javax.inject.Inject
 
 @HiltViewModel
-class ChatViewModel @Inject constructor() : ViewModel() {
+class ChatViewModel @Inject constructor(
+    private val chatRepository: ChatRepository
+) : ViewModel() {
 
     private val _messages = MutableStateFlow<List<ChatMessage>>(emptyList())
     val messages: StateFlow<List<ChatMessage>> = _messages.asStateFlow()
@@ -23,43 +25,44 @@ class ChatViewModel @Inject constructor() : ViewModel() {
     fun sendMessage(content: String) {
         if (content.isBlank()) return
 
-        // Create and add user message
-        val userMessage = ChatMessage(
-            id = UUID.randomUUID().toString(),
-            content = content,
-            isUserMessage = true
-        )
-        
-        // Update messages list with user message
-        val currentMessages = _messages.value.toMutableList()
-        currentMessages.add(0, userMessage)
-        _messages.value = currentMessages
-
-        // Generate AI response
-        generateAiResponse(content)
-    }
-
-    private fun generateAiResponse(userMessage: String) {
         viewModelScope.launch {
-            _isLoading.value = true
-            
-            // Simulate network delay for AI response
-            delay(1500)
-            
-            // For now, just create a simple echo response
-            val aiResponseContent = "This is a simulated AI response to: $userMessage"
-            val aiMessage = ChatMessage(
+            // Create and add user message
+            val userMessage = ChatMessage(
                 id = UUID.randomUUID().toString(),
-                content = aiResponseContent,
-                isUserMessage = false
+                content = content,
+                isUserMessage = true
             )
             
-            // Add AI message to the list
+            // Update messages list with user message
             val currentMessages = _messages.value.toMutableList()
-            currentMessages.add(0, aiMessage)
+            currentMessages.add(0, userMessage)
             _messages.value = currentMessages
+
+            // Set loading state
+            _isLoading.value = true
             
-            _isLoading.value = false
+            try {
+                // Get AI response from the repository
+                val aiMessage = chatRepository.sendMessage(content)
+                
+                // Add AI message to the list
+                val updatedMessages = _messages.value.toMutableList()
+                updatedMessages.add(0, aiMessage)
+                _messages.value = updatedMessages
+            } catch (e: Exception) {
+                // Handle error case
+                val errorMessage = ChatMessage(
+                    id = UUID.randomUUID().toString(),
+                    content = "Error: ${e.message}",
+                    isUserMessage = false
+                )
+                val updatedMessages = _messages.value.toMutableList()
+                updatedMessages.add(0, errorMessage)
+                _messages.value = updatedMessages
+            } finally {
+                // Set loading state to false
+                _isLoading.value = false
+            }
         }
     }
 } 

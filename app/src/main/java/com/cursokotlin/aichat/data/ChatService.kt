@@ -1,7 +1,8 @@
 package com.cursokotlin.aichat.data
 
-import com.cursokotlin.aichat.ui.viewmodels.ChatMessage
+import com.cursokotlin.aichat.ChatMessage
 import kotlinx.coroutines.delay
+import java.util.UUID
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -39,6 +40,7 @@ class ChatService @Inject constructor() {
         }
         
         return ChatMessage(
+            id = UUID.randomUUID().toString(),
             content = response,
             isUserMessage = false
         )

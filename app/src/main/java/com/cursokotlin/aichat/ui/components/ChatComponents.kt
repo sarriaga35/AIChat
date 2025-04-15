@@ -117,7 +117,7 @@ fun ChatMessageItem(
         modifier = modifier
             .fillMaxWidth()
             .padding(horizontal = 8.dp, vertical = 4.dp),
-        verticalAlignment = Alignment.CenterVertically
+        verticalAlignment = Alignment.Top
     ) {
         // For AI messages, we align to the start (left)
         if (!isFromUser) {

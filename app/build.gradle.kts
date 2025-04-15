@@ -32,6 +32,9 @@ android {
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
+        
+        // Disable the deprecation warning for Hilt's generated code
+        isCoreLibraryDesugaringEnabled = true
     }
     kotlinOptions {
         jvmTarget = "17"
@@ -59,6 +62,19 @@ dependencies {
     // Add Hilt Navigation Compose dependency
     implementation(libs.androidx.hilt.navigation.compose)
 
+    // Network - Retrofit, OkHttp, Gson
+    implementation(libs.retrofit)
+    implementation(libs.converter.gson)
+    implementation(libs.okhttp)
+    implementation(libs.logging.interceptor)
+    implementation(libs.gson)
+    
+    // Add javax.annotation for Hilt's @Generated annotation
+    implementation(libs.javax.annotation.api)
+    
+    // Add desugar for API compatibility
+    coreLibraryDesugaring(libs.desugar.jdk.libs)
+
     //Dagger - Hilt
     implementation (libs.hilt.android)
     ksp(libs.hilt.android.compiler)
@@ -72,4 +88,9 @@ dependencies {
     androidTestImplementation(libs.androidx.ui.test.junit4)
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
+}
+
+// Suppress Hilt generated code deprecation warnings
+tasks.withType<JavaCompile> {
+    options.compilerArgs.add("-Xlint:-deprecation")
 }
